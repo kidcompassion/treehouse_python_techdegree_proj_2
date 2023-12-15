@@ -9,13 +9,12 @@ if __name__ =="__main__":
     raw_team_data = constants.TEAMS
 
 
-    #generate 
+    # generate menu
 
     def intro_screen():
         print(f'BASKETBALL TEAM STATS TOOL\n')
         print(f'-----------MENU------------')
         choice_menu_1()
-
 
     def quit():
         pass
@@ -45,6 +44,7 @@ if __name__ =="__main__":
         print(choices_2)
 
         team_selection = input("Enter an option: ").lower()
+
         # Pass in name of selected team
         if team_selection == "a":
             selected_team('Panthers')
@@ -64,6 +64,7 @@ if __name__ =="__main__":
         
         # Drill into the list to grab the dictionary
         selected_team = selected_team[0]
+        #print(selected_team)
 
         #print(selected_team['team_players'])
         # Assign desired values for easier printing
@@ -73,26 +74,38 @@ if __name__ =="__main__":
         formatted_team_roster = []
         total_inexperienced = str(selected_team['team_inexperienced'])
         total_experienced = str(selected_team['team_experienced'])
+        team_guardians = selected_team['team_guardians']
 
-        print(selected_team['team_guardians'])
+       # print(selected_team)
+
+       # print(selected_team['team_guardians'])
         # loop through the roster and push all player names into list
         for x in selected_team_roster:
             formatted_team_roster.append(x['name'])
 
-        # loop through the roster and push all player names into list
-        #for x in selected_team_guardians:
-         #  print(x)
-           # formatted_team_guardians.append(x['name'])
+      
         average_height = [] 
         for y in selected_team['team_players']:
             average_height.append(y['height'])
         
 
+        #format guardian list for rendering
+
+        formatted_guardians = []
+        flattened_guardians = []
+        for l in team_guardians:
+            formatted_guardians.append(l[:-1])
+        for row in formatted_guardians:
+            flattened_guardians += row
+        
+        final_guardians = [''.join(x) for x in flattened_guardians]
+
+
         team_details = "Team: " + selected_team_name + " Stats \n"
         team_details += "Total players: " + str(selected_team_count)+" \n"
         # Concantenate player names into string
         team_details += "Players on Team: " +", ".join(formatted_team_roster) + " \n"
-       # team_details += "Guardians: " +", ".join(formatted_team_guardians) + " \n"
+        team_details += "Guardians: " +", ".join(final_guardians) + " \n"
         team_details += "Total experienced players: " + total_experienced + "\n"
         team_details += "Total inexperienced player: " + total_inexperienced + "\n"
         team_details += "Average player height: " + str(calculate_avg_height(average_height)) + "\n"
@@ -110,6 +123,46 @@ if __name__ =="__main__":
     def generate_guardian_list(args):
         pass
 
+
+    def clean_height():
+        pass
+
+    def clean_experience():
+        pass
+
+    def clean_guardians(player):
+        ## Function runs in a loop and is applied to each player
+        
+        # Break up the guardians string so it can be turned into a list
+        guardians_list = player['guardians'].split(" ")
+        
+        # Filter out the "and" from the guardians string
+        guardians_list = [name for name in guardians_list if 'and' not in name]
+        
+        # If there are two words in the list, that means one guardian, so concatenate with a space
+        if len(guardians_list) == 2 :
+            guardians_list = [" ".join(guardians_list)]
+        # if there are four words in the list, that means two guardians, so add comma separation
+        elif len(guardians_list) == 4:
+            guardians_list = [ " ".join(guardians_list[:2])," ".join(guardians_list[2:]) ]
+        else:
+            guardians_list = ["No guardian on file"]
+            
+        # Put cleaned guardian names back into dictionary, and concantenate whether their child has experience at the end of the list
+        player['guardians'] = guardians_list + [player['experience']]
+        
+
+
+
+    def calculate_avg_height(args):
+        avg_height = args
+        print(avg_height)
+        sum_height = 0
+        total_players = len(avg_height)
+        for x in args:
+            sum_height+=x
+
+        return sum_height/total_players
 
     def clean_data():
         # Clean the player data using copy.deepcopy().
@@ -139,40 +192,20 @@ if __name__ =="__main__":
             player['experience'] = experience_bool
 
             ## GUARDIANS
-            guardians_list = player['guardians'].split(" ")
-            # add the name to the list if it is not the word 'and'
-            guardians_list = [name for name in guardians_list if 'and' not in name]
-            
-            # If there are two words in the list, that means one guardian, so concatenate with a space
-            if len(guardians_list) == 2 :
-                guardians_list = [" ".join(guardians_list)]
-            # if there are four words in the list, that means two guardians, so add comma separation
-            elif len(guardians_list) == 4:
-                guardians_list = [ " ".join(guardians_list[:2])," ".join(guardians_list[2:]) ]
-            else:
-                guardians_list = ["No guardian on file"]
-                
-            # Put cleaned guardian names back into dictionary
-            player['guardians'] = guardians_list
+            clean_guardians(player)
 
+        
 
         return balance_teams(cleaned_player_data, cleaned_team_data)
 
-    def calculate_avg_height(args):
-        avg_height = args
-        print(avg_height)
-        sum_height = 0
-        total_players = len(avg_height)
-        for x in args:
-            sum_height+=x
-
-        return sum_height/total_players
+  
 
     
 
     def balance_teams(player_info, team_info):
         # Create a balance_teams function to balance the players across the three teams
         
+       # print(player_info)
         balanced_teams = []
 
         guardian_list = []
@@ -187,66 +220,72 @@ if __name__ =="__main__":
         # Create lists for experienced and inexperienced players
         experienced_players = []
         inexperienced_players = []
-        
+        experienced_guardians = []
         # Grab all experienced players
         experienced_players = [ x for x in player_info if x['experience'] == True ]
+
+        
         
         #Grab all inexperienced players
         inexperienced_players = [ x for x in player_info if x['experience'] == False ]
         
+
+        #print(experienced_guardians)
         split_players = []
         
         
         # Evenly divide experienced players over total number of teams
         experienced_players = [ experienced_players[i:i+int(team_size/2)] for i in range(0, len(experienced_players), int(team_size/2))]
        
-        experienced_guardians = []
-        # generate guardian based on list
-        for x in experienced_players:
-            parent_list = []
-            for y in x:
-                parent_list.append(y['guardians'])
-            experienced_guardians.append(parent_list)
-            
-
        
 
         # Evenly divide in experienced players over total number of teams
         inexperienced_players = [ inexperienced_players[i:i+int(team_size/2)] for i in range(0, len(inexperienced_players), int(team_size/2))]
        
-       
 
-        inexperienced_guardians = []
-        # generate guardian based on list
-        for l in inexperienced_players:
-            parent_list = []
-            for r in l:
-                parent_list.append(r['guardians'])
-            inexperienced_guardians.append(parent_list)
-        
-        
-       # print(experienced_guardians)
-
-
-
-        split_guardians = []
         
         team_experience_total = len(experienced_players)
         team_inexperience_total = len(inexperienced_players)
         
         
+
+        split_guardians = []
+        experienced_guardians = [ x['guardians'] for x in player_info]
+        formatted_experienced_guardians = []
+        for y in experienced_guardians:
+            parent_experience = len(y) -1
+            if y[parent_experience] == True:
+                formatted_experienced_guardians.append(y)
+
+
+
+        inexperienced_guardians = [ x['guardians'] for x in player_info]
+        formatted_inexperienced_guardians = []
+        for y in inexperienced_guardians:
+            parent_inexperience = len(y) -1
+            if y[parent_inexperience] == False:
+                formatted_inexperienced_guardians.append(y)
+
         
+
+         # Evenly divide experienced players over total number of teams
+        formatted_experienced_guardians = [ formatted_experienced_guardians[i:i+int(team_size/2)] for i in range(0, len(formatted_experienced_guardians), int(team_size/2))]
+       
+       
+
+        # Evenly divide in experienced players over total number of teams
+        formatted_inexperienced_guardians = [ formatted_inexperienced_guardians[i:i+int(team_size/2)] for i in range(0, len(formatted_inexperienced_guardians), int(team_size/2))]
+       
+
         
         # concantenate experienced and inexperienced players 
         for num in range(total_teams):
             split_players.append(experienced_players[int(num)] + inexperienced_players[int(num)])
-           
+            split_guardians.append(formatted_experienced_guardians[int(num)] + formatted_inexperienced_guardians[int(num)])
         
-        for num in range(total_teams):
-            split_guardians = [x['guardians'] for x in split_players[int(num)]]
         
 
-        #print(split_guardians)
+       
         counter = 0
         # for each team, grab the name, the size and a share of the players
         for team in team_info:
@@ -254,7 +293,7 @@ if __name__ =="__main__":
                 "team_name": team,
                 "team_size": team_size,
                 "team_players": split_players[counter],
-                "team_guardians": split_guardians,
+                "team_guardians": split_guardians[counter],
                 "team_inexperienced": team_inexperience_total,
                 "team_experienced": team_experience_total
                 })
