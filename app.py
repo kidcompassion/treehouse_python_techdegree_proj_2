@@ -2,7 +2,7 @@
 
 import constants
 import copy
-import sys
+import sys # To allow the user to quit the application
 
 if __name__ =="__main__":
     # Read the existing player data from the PLAYERS constants provided in constants.py
@@ -33,12 +33,19 @@ if __name__ =="__main__":
         # Get user selection and convert to INT for easier comparisons
         selection = input("Enter an option: ").lower()
 
-        if selection == "a":
-            # If selection is A, choose a team
-            choice_menu_2()
-        elif selection == "b":
-            # If selection is B, quit the app
-            quit()
+        try:
+            if selection == "a":
+                # If selection is A, choose a team
+                choice_menu_2()
+            elif selection == "b":
+                # If selection is B, quit the app
+                quit()
+            else:
+                print("This is not a valid selection. Your choices are A or B. Please try again. ")
+                choice_menu_1()
+        except ValueError:
+            print("You must enter either A, B, or C")
+
         
     def choice_menu_2():
         # When the menu or stats display to the console, it should display in a nice readable format. 
@@ -51,15 +58,20 @@ if __name__ =="__main__":
 
         # Get user selection and set it to lowercase
         team_selection = input("Enter an option: ").lower()
-
-        # Retrieve details from selected team based on user input
-        if team_selection == "a":
-            selected_team('Panthers')
-        elif team_selection == "b":
-            selected_team('Bandits')
-        elif team_selection =="c":
-            selected_team('Warriors')
-
+        
+        try:
+            # Retrieve details from selected team based on user input
+            if team_selection == "a":
+                selected_team('Panthers')
+            elif team_selection == "b":
+                selected_team('Bandits')
+            elif team_selection =="c":
+                selected_team('Warriors')
+            else:
+                print("This is not a valid selection. Your choices are A or B. Please try again")
+                choice_menu_2()
+        except ValueError:
+            print("You must enter either A, B, or C")
 
     def clean_height(player):
         ## FYI: This function runs inside of clean_data() as part of a loop
