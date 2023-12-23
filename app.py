@@ -297,7 +297,11 @@ if __name__ =="__main__":
         
         # After viewing results, have user choose their next option
         next_selection = input("Press ENTER to continue")
+        
         if next_selection == "":
+            choice_menu_1()
+        else:
+            print("This is not a valid choice. Please try again.")
             choice_menu_1()
         
     # Call starting function to run application
